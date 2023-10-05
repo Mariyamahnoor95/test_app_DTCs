@@ -230,12 +230,14 @@ public class MainActivity extends AppCompatActivity {
         java.io.InputStream inputStream = socket.getInputStream();
         java.io.OutputStream outputStream = socket.getOutputStream();
 
+
+
         // create a new string array for the responses
         String[] responses = new String[allDTCs.size() + 1];
 
         // set the first element to the current timestamp
         responses[0] = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-
+        Log.e("date format ", responses[0]);
         // Iterate through the list of DTCs and retrieve responses
         for  (int i = 0; i < allDTCs.size(); i++) {
             String dtc = allDTCs.get(i);
@@ -243,6 +245,10 @@ public class MainActivity extends AppCompatActivity {
                 dtCsCommand = new DTCsCommand();
                 dtCsCommand.sendCommand(outputStream, dtc);
                 rawData = dtCsCommand.readRawData(inputStream);
+
+
+
+
 
                 Log.i("ContentValues", "Output response received: " + rawData);
                 // store the response in the responses array
@@ -254,16 +260,18 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("ContentValues", "DTC received");
 
                 // Show a toast message indicating success
-                Toast.makeText(this, "Response received", Toast.LENGTH_SHORT).show();
+               // Toast.makeText(this, "Response....... received", Toast.LENGTH_SHORT).show();
 
                 // Add a log entry to the list
                 dtcsloglist.add("Response received");
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.e("ContentValues", "Error occurred");
+                Log.e("ContentValues", "Error occurred..................");
                 Toast.makeText(MainActivity.this, "Error occurred", Toast.LENGTH_SHORT).show();
             }
         }
+
+//        dtcdataslist.add(dtcCodes.toArray(new String[0])); // Add the DTC codes as headers
         // add the responses to the dtcdataslist
         dtcdataslist.add(responses);
 
@@ -281,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             // Define the base directory path
-            File baseDir = new File(getExternalFilesDir(null), "test_app_apk_to_soursecodelogs");
+            File baseDir = new File(getExternalFilesDir(null), "test_app_DTCslogs");
             // Create the directories if they don't exist
             if (!baseDir.exists()) {
                 if (baseDir.mkdirs()) {
@@ -300,7 +308,14 @@ public class MainActivity extends AppCompatActivity {
             if (!file.exists()) {
                 if (file.createNewFile()) {
                     Log.d("ContentValues", "Created CSV file: " + file.getAbsolutePath());
-                    dtcdataslist.add(0, new String[]{"DTC", "Response"});
+                 //   dtcdataslist.add(0, new String[]{"DTC", "Response"});
+
+                    String[] header = new String[allDTCs.size() + 1];
+                    header[0] = "Timestamp"; // Assuming the first column is for timestamps
+                    for (int i = 0; i < allDTCs.size(); i++) {
+                        header[i + 1] = allDTCs.get(i);
+                    }
+                    dtcdataslist.add(0, header);
                 } else {
                     Log.e("ContentValues", "Failed to create CSV file: " + file.getAbsolutePath());
                 }
@@ -311,6 +326,7 @@ public class MainActivity extends AppCompatActivity {
             // Write data to the CSV file
             CSVWriter csvWriter = new CSVWriter(new FileWriter(file, true));
             Log.e("ContentValues", " the whole data " + data);
+
             csvWriter.writeAll(data);
             csvWriter.close();
 
